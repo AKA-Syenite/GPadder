@@ -14,11 +14,13 @@ namespace GPadder
         private readonly GamepadManager _gamepadManager;
         
         private Dropdown _gamepadDropdown;
+        private Checkbox _autoSwitchCheckbox;
         private Label _statusLabel;
         private FlowPanel _inputPanel;
         private Label[] _buttonLabels;
         private Label _stickLabel;
         private Label _triggerLabel;
+        private Label _extraButtonsLabel;
 
         public GamepadSettingsView(GamepadManager gamepadManager)
         {
@@ -54,7 +56,7 @@ namespace GPadder
 
             _gamepadDropdown = new Dropdown
             {
-                Width = 200,
+                Width = 250,
                 Parent = selectionPanel
             };
 
@@ -62,11 +64,36 @@ namespace GPadder
 
             _gamepadDropdown.ValueChanged += (s, e) =>
             {
-                if (Enum.TryParse<PlayerIndex>(e.CurrentValue, out var index))
+                var parts = e.CurrentValue.Split(' ');
+                if (parts.Length > 0 && int.TryParse(parts[0], out var index))
                 {
                     _gamepadManager.SelectGamepad(index);
                 }
             };
+
+            _autoSwitchCheckbox = new Checkbox
+            {
+                Text = "Auto-switch Gamepad",
+                Checked = _gamepadManager.AutoSwitch,
+                Parent = selectionPanel
+            };
+            _autoSwitchCheckbox.CheckedChanged += (s, e) =>
+            {
+                _gamepadManager.AutoSwitch = e.Checked;
+            };
+
+            var refreshButton = new StandardButton
+            {
+                Text = "Refresh List",
+                Width = 100,
+                Parent = selectionPanel
+            };
+            refreshButton.Click += (s, e) => RefreshGamepadList();
+
+            // Subscribe to connection events
+            _gamepadManager.GamepadConnected += (s, e) => RefreshGamepadList();
+            _gamepadManager.GamepadDisconnected += (s, e) => RefreshGamepadList();
+            _gamepadManager.SelectedGamepadChanged += (s, e) => SyncDropdown(e.PlayerIndex);
 
             // Status
             _statusLabel = new Label
@@ -126,6 +153,7 @@ namespace GPadder
 
             _stickLabel = new Label { Text = "Sticks: ", AutoSizeWidth = true, Parent = _inputPanel };
             _triggerLabel = new Label { Text = "Triggers: ", AutoSizeWidth = true, Parent = _inputPanel };
+            _extraButtonsLabel = new Label { Text = "Extra Buttons: None", AutoSizeWidth = true, Parent = _inputPanel };
             
             _buttonLabels = new Label[15];
             var buttons = Enum.GetValues(typeof(Buttons)).Cast<Buttons>().Take(15).ToList();
@@ -146,12 +174,19 @@ namespace GPadder
             _gamepadDropdown.Items.Clear();
             foreach (var index in _gamepadManager.GetConnectedGamepads())
             {
-                _gamepadDropdown.Items.Add(index.ToString());
+                var name = _gamepadManager.GetGamepadName(index);
+                _gamepadDropdown.Items.Add($"{index} ({name})");
             }
 
-            if (_gamepadDropdown.Items.Count > 0 && string.IsNullOrEmpty(_gamepadDropdown.SelectedItem))
+            SyncDropdown(_gamepadManager.SelectedIndex);
+        }
+
+        private void SyncDropdown(int index)
+        {
+            var item = _gamepadDropdown.Items.FirstOrDefault(i => i.StartsWith(index.ToString()));
+            if (item != null)
             {
-                _gamepadDropdown.SelectedItem = _gamepadDropdown.Items[0];
+                _gamepadDropdown.SelectedItem = item;
             }
         }
 
@@ -159,7 +194,10 @@ namespace GPadder
         {
             if (_statusLabel == null) return;
 
-            _statusLabel.Text = _gamepadManager.IsConnected ? "Status: Connected" : "Status: Disconnected";
+            var activeIndex = _gamepadManager.SelectedIndex;
+            _statusLabel.Text = _gamepadManager.IsConnected 
+                ? $"Status: Connected on index {activeIndex}" 
+                : $"Status: Disconnected (index {activeIndex} selected)";
             _statusLabel.TextColor = _gamepadManager.IsConnected ? Color.Green : Color.Red;
 
             if (_gamepadManager.IsConnected)
@@ -173,6 +211,18 @@ namespace GPadder
                 {
                     bool isPressed = state.IsButtonDown(buttons[i]);
                     _buttonLabels[i].TextColor = isPressed ? Color.White : Color.Gray;
+                }
+
+                var extraButtons = _gamepadManager.GetPressedJoystickButtons().ToList();
+                if (extraButtons.Any())
+                {
+                    _extraButtonsLabel.Text = $"Extra Buttons: {string.Join(", ", extraButtons)}";
+                    _extraButtonsLabel.TextColor = Color.White;
+                }
+                else
+                {
+                    _extraButtonsLabel.Text = "Extra Buttons: None";
+                    _extraButtonsLabel.TextColor = Color.Gray;
                 }
             }
         }

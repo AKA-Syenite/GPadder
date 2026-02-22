@@ -105,6 +105,16 @@ namespace GPadder
             _internalExampleSettingSubCollection = settings.AddSubCollection("internal settings (not visible in UI)");
             _hiddenIntExampleSetting = _internalExampleSettingSubCollection.DefineSetting("example window x position", 50);
             _hiddenIntExampleSetting2 = _internalExampleSettingSubCollection.DefineSetting("example window y position", 50);
+
+            _autoSwitchGamepad = settings.DefineSetting(
+                "AutoSwitchGamepad",
+                false,
+                () => "Auto-switch Gamepad",
+                () => "Automatically switch to the gamepad sending input.");
+            
+            _autoSwitchGamepad.SettingChanged += (s, e) => {
+                if (_gamepadManager != null) _gamepadManager.AutoSwitch = e.NewValue;
+            };
         }
 
         private void UpdateCharacterWindowColor(object sender, ValueChangedEventArgs<ColorType> e)
@@ -148,6 +158,7 @@ namespace GPadder
             CreateCornerIconWithContextMenu();
 
             _gamepadManager = new GamepadManager();
+            _gamepadManager.AutoSwitch = _autoSwitchGamepad.Value;
             CreateGamepadWindow();
         }
 
@@ -443,5 +454,6 @@ namespace GPadder
         private GamepadManager _gamepadManager;
         private StandardWindow _gamepadWindow;
         private GamepadSettingsView _gamepadSettingsView;
+        private SettingEntry<bool> _autoSwitchGamepad;
     }
 }
