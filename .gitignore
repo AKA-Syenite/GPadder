@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 
 .tmp*/
+*.ps1
+BlishHUD/

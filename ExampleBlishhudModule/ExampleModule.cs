@@ -17,12 +17,13 @@ using Color = Microsoft.Xna.Framework.Color;
 using Point = Microsoft.Xna.Framework.Point;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+
 // You can rename the namespace to whatever you want. Including the module name in the namespace is good idea.
 // If you change this in the future again after you already released a module version, you should let freesnow know about it.
 // Because they have to update that in the Sentry Blish Bug tracker, too.
 // This namespace does not have to match the namespace in the manifest.json. They are not related. 
 // (Side note: the manifest.json namespace has to be set once and must NOT be changed after a module was released)
-namespace ExampleBlishhudModule
+namespace GPadder
 {
     [Export(typeof(Module))]
     public class ExampleModule : Module
@@ -145,6 +146,28 @@ namespace ExampleBlishhudModule
             await CreateGw2StyleWindowThatDisplaysAllCurrencies(windowBackgroundTexture);
             CreateWindowWithCharacterNames();
             CreateCornerIconWithContextMenu();
+
+            _gamepadManager = new GamepadManager();
+            CreateGamepadWindow();
+        }
+
+        private void CreateGamepadWindow()
+        {
+            _gamepadWindow = new StandardWindow(
+                AsyncTexture2D.FromAssetId(155997),
+                new Rectangle(25, 26, 600, 700),
+                new Rectangle(40, 50, 580, 650))
+            {
+                Parent = GameService.Graphics.SpriteScreen,
+                Title = "Gamepad Test",
+                Subtitle = "Vibe Check",
+                Location = new Point(400, 400),
+                SavesPosition = true,
+                Id = $"{nameof(ExampleModule)}_Gamepad_Test_Window"
+            };
+
+            _gamepadSettingsView = new GamepadSettingsView(_gamepadManager);
+            _gamepadWindow.Show(_gamepadSettingsView);
         }
 
         // Allows your module to run logic such as updating UI elements,
@@ -174,6 +197,9 @@ namespace ExampleBlishhudModule
                 // we use Task.Run here to prevent blocking the update loop with a possibly long running task
                 Task.Run(GetCharacterNamesFromApiAndShowThemInLabel);
             }
+
+            _gamepadManager?.Update(gameTime);
+            _gamepadSettingsView?.UpdateView(gameTime);
         }
 
         // For a good module experience, your module should clean up ANY and ALL entities
@@ -199,6 +225,9 @@ namespace ExampleBlishhudModule
             // only .Dispose() textures you created yourself or loaded from your ref folder
             // NEVER .Dipose() textures from DatAssetCache because those textures are shared between modules and blish.
             _mugTexture?.Dispose(); 
+
+            _gamepadWindow?.Dispose();
+            _gamepadManager?.Dispose();
 
             // All static members must be manually unset
             // Static members are not automatically cleared and will keep a reference to your,
@@ -410,5 +439,9 @@ namespace ExampleBlishhudModule
         private StandardWindow _exampleWindow;
         private double _notificationRunningTime;
         private double _updateCharactersRunningTime;
+
+        private GamepadManager _gamepadManager;
+        private StandardWindow _gamepadWindow;
+        private GamepadSettingsView _gamepadSettingsView;
     }
 }

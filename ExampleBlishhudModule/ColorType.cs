@@ -1,4 +1,4 @@
-﻿namespace ExampleBlishhudModule
+﻿namespace GPadder
 {
     public enum ColorType
     {
