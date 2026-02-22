@@ -1,0 +1,23 @@
+# BlishHUD Module Development
+
+## Overview
+Blish HUD is a C# overlay for Guild Wars 2 powered by MonoGame. It supports .NET modules that can extend its functionality.
+
+## Module Lifecycle
+Modules should override key methods in their `Module` class:
+- `DefineSettings(SettingCollection settings)`: Define user-configurable settings.
+- `Initialize()`: Perform initial setup before the module is loaded.
+- `OnModuleLoaded(EventArgs e)`: Called when the module is fully loaded and ready.
+- `Update(GameTime gameTime)`: Called every frame for logic updates.
+- `Unload()`: Clean up resources.
+
+## Best Practices
+- **Stability**: Ensure the module handles errors gracefully to avoid crashing BlishHUD.
+- **Resource Usage**: Be mindful of CPU and memory, especially in `Update`.
+- **UI/UX**: Use the BlishHUD UI framework for consistency with GW2.
+
+## Key APIs
+- `GameService.Settings`: Manage persistence.
+- `GameService.Graphics.SpriteScreen`: Root for UI controls.
+- `GameService.Input`: Access keyboard, mouse, and game input.
+- `GameService.Gw2Mumble`: Access Guild Wars 2 MumbleLink data.

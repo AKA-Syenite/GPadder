@@ -1,0 +1,20 @@
+# BlishHUD Module Directory
+
+A comprehensive listing of modules available for BlishHUD.
+
+| Name | Description | Repository |
+| :--- | :--- | :--- |
+| **Pathing** | Renders community-made markers & trails. | [Link](https://github.com/blish-hud/Pathing) |
+| **Event Table** | Displays timer-based events. | [Link](https://github.com/Tharylia/Blish-HUD-Modules) |
+| **Mounts & More** | Mount and mastery skill icons. | [Link](https://github.com/bennieboj/BlishHud-Mounts) |
+| **Achievement Tracker** | Track achievements with wiki info. | [Link](https://github.com/blish-hud/bhud-modules) |
+| **Characters** | Fast character switching. | [Link](https://github.com/KenediaDev/Kenedia.BlishHUD) |
+| **Mystic Crafting** | Legendary crafting progression. | [Link](https://github.com/blish-hud/bhud-modules) |
+| **Tyrian QoL** | Collection of QoL features. | [Link](https://github.com/KenediaDev/Kenedia.BlishHUD) |
+| **Clears Tracker** | Track PvE clears for Raids/Fractals. | [Link](https://github.com/blish-hud/bhud-modules) |
+| **Item Search** | Search items across account. | [Link](https://github.com/tentose/Gw2ItemSearch) |
+| **Fishing Buddy** | Fishing info and time of day. | [Link](https://github.com/blish-hud/bhud-modules) |
+| ... and 80+ more modules ...
+
+> [!NOTE]
+> Most community modules are found in [bhud-modules](https://github.com/blish-hud/bhud-modules) or [Community-Module-Pack](https://github.com/blish-hud/Community-Module-Pack).

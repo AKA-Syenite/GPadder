@@ -1,0 +1,15 @@
+# AI Coding Best Practices & Pitfalls
+
+## Best Practices
+- **Pair Programmer Mindset**: Treat AI as a collaborator, not an autopilot. Always review and verify.
+- **Incremental Generation**: Write and test small chunks of code rather than large blocks.
+- **Test-Driven Development (TDD)**: Write tests first to define the expected behavior for AI-generated code.
+- **Context Management**: Provide clear, concise context to the AI for better results.
+- **Security Check**: Never share sensitive credentials with AI tools.
+
+## Common Pitfalls
+- **"Almost Right" Syndrome**: AI producing code that looks correct but has subtle bugs.
+- **Ghost Technical Debt**: Implementing complex AI-generated code that the human developer doesn't understand.
+- **Outdated Dependencies**: AI suggesting deprecated libraries or vulnerable versions.
+- **Performance Blindness**: Ignoring inefficient algorithms in AI-generated code.
+- **Bias**: AI inheriting biases from its training data.
