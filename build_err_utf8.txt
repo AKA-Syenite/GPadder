@@ -1,0 +1,15 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\GamepadManager.cs(56,106): error CS1061: 'GamePadCapabilities' does not contain a definition for 'Buttons' and no accessible extension method 'Buttons' accepting a first argument of type 'GamePadCapabilities' could be found (are you missing a using directive or an assembly reference?) [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleModule.cs(351,30): warning CS0168: The variable 'e' is declared but never used [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleModule.cs(378,30): warning CS0168: The variable 'e' is declared but never used [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+
+Build FAILED.
+
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleModule.cs(351,30): warning CS0168: The variable 'e' is declared but never used [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleModule.cs(378,30): warning CS0168: The variable 'e' is declared but never used [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\GamepadManager.cs(56,106): error CS1061: 'GamePadCapabilities' does not contain a definition for 'Buttons' and no accessible extension method 'Buttons' accepting a first argument of type 'GamePadCapabilities' could be found (are you missing a using directive or an assembly reference?) [C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\ExampleBlishhudModule.csproj]
+    2 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:00.61

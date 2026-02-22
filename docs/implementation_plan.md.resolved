@@ -1,0 +1,25 @@
+# Flesh out USB and Gamepad Logging Plan
+
+The goal is to provide deep diagnostic information about connected USB devices and gamepads to help troubleshoot detection issues.
+
+## Proposed Changes
+
+### [GamepadManager]
+
+#### [MODIFY] [GamepadManager.cs](file:///c:/Users/syenite/Documents/GPadder-20260222T132711Z-1-001/GPadder/ExampleBlishhudModule/GamepadManager.cs)
+
+- Add a method to enumerate USB devices using WMI (`Win32_PnPEntity` or `Win32_USBHub`).
+- Log detailed device information including:
+    - Name
+    - DeviceID (contains VID/PID)
+    - Status
+    - Manufacturer (if available)
+- Enhance MonoGame `Joystick.GetCapabilities` and `GamePad.GetCapabilities` logging to include more specific details about axes and buttons.
+- Log these details at startup and whenever a device connection event is detected.
+
+## Verification Plan
+
+### Manual Verification
+- Run the BlishHUD module and check the updated [diagnostics.log](file:///c:/Users/syenite/Documents/GPadder-20260222T132711Z-1-001/GPadder/BlishHUD/gpadder-data/diagnostics.log).
+- Verify that USB devices (even if not recognized as gamepads) are listed in the log.
+- Verify that gamepad capabilities are logged in detail.

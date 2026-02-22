@@ -1,0 +1,10 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ExampleBlishhudModule -> C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\bin\Debug\net48\GPadder.dll
+  Zipping directory "C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\bin\Debug\net48\.bhm" to "C:\Users\syenite\Documents\GPadder-20260222T132711Z-1-001\GPadder\ExampleBlishhudModule\bin\Debug\net48\GPadder.bhm".
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.62

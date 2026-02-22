@@ -138,7 +138,7 @@ namespace GPadder
                 var allFiles = Directory.EnumerateFiles(fullDirectoryPath, "*", SearchOption.AllDirectories).ToList();
 
                 // example of how to log something in the blishhud.XXX-XXX.log file in %userprofile%\Documents\Guild Wars 2\addons\blishhud\logs
-                Logger.Info($"'{directoryName}' can be found at '{fullDirectoryPath}' and has {allFiles.Count} total files within it.");
+                Log($"'{directoryName}' can be found at '{fullDirectoryPath}' and has {allFiles.Count} total files within it.");
             }
 
             // Load content from the ref directory in the module.bhm with the ContentsManager
@@ -157,7 +157,8 @@ namespace GPadder
             CreateWindowWithCharacterNames();
             CreateCornerIconWithContextMenu();
 
-            _gamepadManager = new GamepadManager();
+            string logPath = Path.Combine(DirectoriesManager.GetFullDirectoryPath("gpadder-data"), "diagnostics.log");
+            _gamepadManager = new GamepadManager(logPath);
             _gamepadManager.AutoSwitch = _autoSwitchGamepad.Value;
             CreateGamepadWindow();
         }
@@ -347,7 +348,7 @@ namespace GPadder
                 // request characters endpoint from api
                 charactersApiResponse = await Gw2ApiManager.Gw2ApiClient.V2.Characters.AllAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Warning:
                 // Blish Hud uses the tool Sentry in combination with the ErrorSubmissionModule to upload ERROR and FATAL log entries to a web server.
@@ -355,7 +356,7 @@ namespace GPadder
                 // can be down for up to a few days. That triggers a lot of api exceptions which would end up spamming the Sentry tool.
                 // Instead use Logger.Info() or .Warn() if you want to log api response errors. Those do not get stored by the Sentry tool.
                 // But you do not have to log api response exceptions. Just make sure that your module has no issues with failing api requests.
-                Logger.Info("Failed to get character names from api.");
+                Log("Failed to get character names from api.");
             }
 
             // extract character names from api response and show them inside a label
@@ -374,9 +375,9 @@ namespace GPadder
                 // Because of that it is not necessary to check for api key permissions or for the api subtoken to be available.
                 currenciesApiResponse = await Gw2ApiManager.Gw2ApiClient.V2.Currencies.AllAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Logger.Info("Failed to get currencies from api.");
+                Log("Failed to get currencies from api.");
             }
 
             // create a window with gw2 window style.
@@ -432,6 +433,14 @@ namespace GPadder
             }
 
             _exampleWindow.Show();
+        }
+
+        private void Log(string message)
+        {
+            if (_gamepadManager != null)
+                _gamepadManager.Log(message);
+            else
+                Logger.Info(message);
         }
 
         internal static ExampleModule ExampleModuleInstance;

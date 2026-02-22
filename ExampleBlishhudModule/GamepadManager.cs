@@ -11,12 +11,13 @@ namespace GPadder
     public class GamepadManager : IDisposable
     {
         private static readonly Logger Logger = Logger.GetLogger<GamepadManager>();
+        private string _diagnosticLogPath;
 
         private int _currentPlayerIndex = 0;
         private GamePadState _previousState;
         private GamePadState _currentState;
 
-        private static int MaxGamepads = 8;
+        private static int MaxGamepads = 16;
         
         private JoystickState _previousJoystickState;
         private JoystickState _currentJoystickState;
@@ -30,27 +31,74 @@ namespace GPadder
         public int SelectedIndex => _currentPlayerIndex;
         public bool AutoSwitch { get; set; } = false;
 
-        public GamepadManager()
+        public GamepadManager(string diagnosticLogPath = null)
         {
-            var connected = GetConnectedGamepads().ToList();
-            Logger.Info($"GamepadManager initialized. Found {connected.Count} connected gamepads: {string.Join(", ", connected)}");
+            _diagnosticLogPath = diagnosticLogPath;
             
+            Log("--- GamepadManager Initialization ---");
+            Log($"MaxGamepads search range: {MaxGamepads}");
+            
+            var connected = GetConnectedGamepads().ToList();
+            Log($"Initial detection found {connected.Count} controllers: {string.Join(", ", connected)}");
+            
+            // Detailed scan of all possible indices at startup
+            Log("--- Detailed Startup Scan ---");
+            for (int i = 0; i < MaxGamepads; i++)
+            {
+                var caps = GamePad.GetCapabilities(i);
+                var joyCaps = Joystick.GetCapabilities(i);
+                var joyState = Joystick.GetState(i);
+                
+                if (caps.IsConnected || joyCaps.IsConnected || joyState.IsConnected)
+                {
+                    var name = GetGamepadName(i);
+                    Log($"Index {i} [FOUND]: Name='{name}'", false); // Only to file
+                    Log($"  XInput: Connected={caps.IsConnected}, Type={caps.GamePadType}", false);
+                    Log($"  Joystick: Connected={joyCaps.IsConnected}, Name='{joyCaps.DisplayName}', AxisCount={joyCaps.AxisCount}, ButtonCount={joyCaps.ButtonCount}, HatCount={joyCaps.HatCount}", false);
+                    Log($"  JoystickState: IsConnected={joyState.IsConnected}", false);
+                    
+                    // Main log summary
+                    Log($"Index {i}: {name} (XInput={caps.IsConnected}, Joystick={joyCaps.IsConnected})");
+                }
+                else
+                {
+                    Log($"Index {i} [EMPTY]: XInput=No, Joystick=No", false);
+                }
+            }
+            Log("--- End Startup Scan ---");
+
             if (connected.Any())
             {
                 _currentPlayerIndex = connected.First();
-                Logger.Info($"Defaulting to first connected gamepad: {_currentPlayerIndex}");
+                Log($"Selected default index {_currentPlayerIndex}");
             }
             else
             {
-                Logger.Info("No gamepads found at startup. Defaulting to index 0");
+                Log("No controllers found at startup. Defaulting to index 0");
                 _currentPlayerIndex = 0;
             }
 
             _currentState = GamePad.GetState(_currentPlayerIndex);
             _previousState = _currentState;
             
-            _currentJoystickState = Joystick.GetState((int)_currentPlayerIndex);
+            _currentJoystickState = Joystick.GetState(_currentPlayerIndex);
             _previousJoystickState = _currentJoystickState;
+        }
+
+        public void Log(string message, bool alsoBlish = true)
+        {
+            if (alsoBlish) Logger.Info(message);
+            
+            if (string.IsNullOrEmpty(_diagnosticLogPath)) return;
+
+            try
+            {
+                System.IO.File.AppendAllText(_diagnosticLogPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                if (alsoBlish) Logger.Warn($"Failed to write to diagnostic log: {ex.Message}");
+            }
         }
 
         public void Update(GameTime gameTime)
@@ -68,17 +116,17 @@ namespace GPadder
             {
                 if (isConnected)
                 {
-                    Logger.Info($"Gamepad connected on index {_currentPlayerIndex}");
+                    Log($"Gamepad connected on index {_currentPlayerIndex}");
                     GamepadConnected?.Invoke(this, new GamepadEventArgs(_currentPlayerIndex));
                 }
                 else
                 {
-                    Logger.Info($"Gamepad disconnected on index {_currentPlayerIndex}");
+                    Log($"Gamepad disconnected on index {_currentPlayerIndex}");
                     GamepadDisconnected?.Invoke(this, new GamepadEventArgs(_currentPlayerIndex));
                 }
             }
 
-            if (gameTime.TotalGameTime.TotalMilliseconds % 2000 < 50) // Roughly every 2 seconds
+            if (gameTime.TotalGameTime.TotalMilliseconds % 5000 < 50) // Roughly every 5 seconds
             {
                 CheckForNewConnections();
             }
@@ -100,7 +148,7 @@ namespace GPadder
                 {
                     if (_currentPlayerIndex != i)
                     {
-                        Logger.Info($"Detected input on gamepad {i}. Auto-switching.");
+                        Log($"Detected input on gamepad {i}. Auto-switching.");
                         SelectGamepad(i);
                     }
                     break;
@@ -186,17 +234,27 @@ namespace GPadder
         {
             for (int i = 0; i < MaxGamepads; i++)
             {
-                if (i == _currentPlayerIndex) continue;
+                var xState = GamePad.GetState(i);
+                var jCaps = Joystick.GetCapabilities(i);
+                var jState = Joystick.GetState(i);
 
-                var state = GamePad.GetState(i);
-                var joystickState = Joystick.GetState(i);
+                bool isXInput = xState.IsConnected;
+                bool isJoystick = jCaps.IsConnected || jState.IsConnected;
                 
-                if (state.IsConnected || joystickState.IsConnected)
+                if (isXInput || isJoystick)
                 {
-                    // If we are currently disconnected, we might want to auto-switch
-                    if (!IsConnected)
+                    // If we were previously disconnected on the current index, but now something is here, we should update states
+                    if (i == _currentPlayerIndex && !IsConnected)
                     {
-                        Logger.Info($"Found new gamepad on index {i} while current is disconnected. Auto-switching.");
+                         Log($"Current index {_currentPlayerIndex} is now connected. XInput={isXInput}, Joystick={isJoystick}");
+                         Log($"  New Caps - XInput: {isXInput}, JoystickName: '{jCaps.DisplayName}', Buttons: {jCaps.ButtonCount}", false);
+                         // States will be updated in the main Update loop
+                    }
+                    // If we are currently disconnected globally, auto-switch to first thing found
+                    else if (!IsConnected)
+                    {
+                        Log($"Found new controller on index {i} while current is disconnected. Auto-switching.");
+                        Log($"  Device at index {i}: XInput={isXInput}, Name='{jCaps.DisplayName}'", false);
                         SelectGamepad(i);
                         GamepadConnected?.Invoke(this, new GamepadEventArgs(i));
                         break;
@@ -216,7 +274,7 @@ namespace GPadder
             _currentJoystickState = Joystick.GetState(_currentPlayerIndex);
             _previousJoystickState = _currentJoystickState;
 
-            Logger.Info($"Selected gamepad index: {_currentPlayerIndex}");
+            Log($"Selected gamepad index: {_currentPlayerIndex}");
             SelectedGamepadChanged?.Invoke(this, new GamepadEventArgs(_currentPlayerIndex));
         }
 
@@ -235,7 +293,10 @@ namespace GPadder
         {
             for (int i = 0; i < MaxGamepads; i++)
             {
-                if (GamePad.GetState(i).IsConnected || Joystick.GetCapabilities(i).IsConnected)
+                bool isX = GamePad.GetState(i).IsConnected;
+                bool isJ = Joystick.GetCapabilities(i).IsConnected || Joystick.GetState(i).IsConnected;
+                
+                if (isX || isJ)
                 {
                     yield return i;
                 }
